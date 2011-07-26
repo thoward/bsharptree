@@ -2,4 +2,4 @@ glob:*.user
 glob:*.suo
 glob:*/bin/*
 glob:*/obj/*
-glob: *_ReSharper.*
+glob:*/_ReSharper.*

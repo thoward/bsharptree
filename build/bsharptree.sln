@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree", "..\src\bsharptree\bsharptree.csproj", "{78835932-FBAA-4F6D-A3FD-9F25055E285C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree.test", "..\src\bsharptree.test\bsharptree.test.csproj", "{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78835932-FBAA-4F6D-A3FD-9F25055E285C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78835932-FBAA-4F6D-A3FD-9F25055E285C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78835932-FBAA-4F6D-A3FD-9F25055E285C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78835932-FBAA-4F6D-A3FD-9F25055E285C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

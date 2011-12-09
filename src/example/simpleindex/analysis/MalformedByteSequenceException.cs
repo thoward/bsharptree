@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace bsharptree.example.simpleindex
+namespace bsharptree.example.simpleindex.analysis
 {
     public class MalformedByteSequenceException : Exception
     {

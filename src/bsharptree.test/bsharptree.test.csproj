@@ -44,12 +44,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BPlusTreeTest.cs" />
+    <Compile Include="mockindex\Document.cs" />
+    <Compile Include="mockindex\DocumentComparer.cs" />
+    <Compile Include="mockindex\IIndex.cs" />
+    <Compile Include="mockindex\IInversion.cs" />
+    <Compile Include="mockindex\IInversionUnit.cs" />
+    <Compile Include="mockindex\IInverter.cs" />
+    <Compile Include="mockindex\InversionUnit.cs" />
+    <Compile Include="mockindex\ParseNodeExtensions.cs" />
+    <Compile Include="mockindex\StringInverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="mockindex\QueryClause.cs" />
+    <Compile Include="mockindex\QueryClauseFlag.cs" />
+    <Compile Include="mockindex\QueryExecutor.cs" />
+    <Compile Include="mockindex\QueryExtensions.cs" />
+    <Compile Include="mockindex\SimpleIndex.cs" />
+    <Compile Include="mockindex\Term.cs" />
+    <Compile Include="mockindex\TermComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\bsharptree\bsharptree.csproj">

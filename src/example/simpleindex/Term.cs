@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using bsharptree.definition;
+using bsharptree.example.simpleindex.analysis;
 using bsharptree.toolkit;
 
 namespace bsharptree.example.simpleindex

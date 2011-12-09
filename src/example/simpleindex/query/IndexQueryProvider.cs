@@ -1,4 +1,6 @@
-﻿namespace bsharptree.example.simpleindex.query
+﻿using bsharptree.example.simpleindex.analysis;
+
+namespace bsharptree.example.simpleindex.query
 {
     using System;
     using System.Collections;

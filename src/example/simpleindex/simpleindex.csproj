@@ -40,14 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CharLocation.cs" />
+    <Compile Include="analysis\CharLocation.cs" />
     <Compile Include="Class1.cs" />
-    <Compile Include="DefaultAnalyzer.cs" />
+    <Compile Include="analysis\DefaultAnalyzer.cs" />
     <Compile Include="Document.cs" />
-    <Compile Include="DocumentLocation.cs" />
-    <Compile Include="IAnalyzer.cs" />
+    <Compile Include="analysis\DocumentLocation.cs" />
+    <Compile Include="analysis\IAnalyzer.cs" />
     <Compile Include="IndexWriter.cs" />
-    <Compile Include="MalformedByteSequenceException.cs" />
+    <Compile Include="analysis\MalformedByteSequenceException.cs" />
     <Compile Include="query\parser\Parser.cs" />
     <Compile Include="query\parser\ParseTree.cs" />
     <Compile Include="query\parser\Scanner.cs" />
@@ -58,7 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="query\Query.cs" />
     <Compile Include="query\QueryProvider.cs" />
-    <Compile Include="Span.cs" />
+    <Compile Include="analysis\Span.cs" />
     <Compile Include="storage\IStorageItem.cs" />
     <Compile Include="storage\RecordStorage.cs" />
     <Compile Include="storage\Storage.cs" />
@@ -69,9 +69,9 @@
     <Compile Include="storage\TermRecordStorage.cs" />
     <Compile Include="storage\TermStorage.cs" />
     <Compile Include="query\TypeSystem.cs" />
-    <Compile Include="TermLocation.cs" />
-    <Compile Include="Utf8CharScanner.cs" />
-    <Compile Include="Utf8Reader.cs" />
+    <Compile Include="analysis\TermLocation.cs" />
+    <Compile Include="analysis\Utf8CharScanner.cs" />
+    <Compile Include="analysis\Utf8Reader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\bsharptree\bsharptree.csproj">

@@ -1,10 +1,10 @@
-﻿namespace bsharptree.example.simpleindex
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
+namespace bsharptree.example.simpleindex.analysis
+{
     public class DefaultAnalyzer : IAnalyzer
     {
         public IEnumerable<TermLocation> GetTermPositions(Stream stream)

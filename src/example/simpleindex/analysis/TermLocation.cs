@@ -1,4 +1,4 @@
-﻿namespace bsharptree.example.simpleindex
+﻿namespace bsharptree.example.simpleindex.analysis
 {
     public struct TermLocation
     {

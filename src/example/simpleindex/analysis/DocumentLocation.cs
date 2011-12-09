@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Text;
 
-namespace bsharptree.example.simpleindex
+namespace bsharptree.example.simpleindex.analysis
 {
     public struct DocumentLocation
     {

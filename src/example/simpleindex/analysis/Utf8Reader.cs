@@ -1,8 +1,8 @@
-﻿namespace bsharptree.example.simpleindex
-{
-    using System.IO;
+﻿using System.IO;
 
-    public class Utf8CharScanner
+namespace bsharptree.example.simpleindex.analysis
+{
+    public class Utf8Reader
     {
         /// <summary>Default byte buffer size (2048).</summary>
         public const int DefaultBufferSize = 2048;
@@ -17,19 +17,19 @@
         private int _bufferOffset;
 
         /** Surrogate character. */
-        private CharLocation _surrogate;
+        private char? _surrogate;
 
-        public Utf8CharScanner(Stream inputStream)
+        public Utf8Reader(Stream inputStream)
             : this(inputStream, DefaultBufferSize)
         {
         }
 
-        public Utf8CharScanner(Stream inputStream, int size)
+        public Utf8Reader(Stream inputStream, int size)
             : this(inputStream, new byte[size])
         {
         }
 
-        public Utf8CharScanner(Stream inputStream, byte[] buffer)
+        public Utf8Reader(Stream inputStream, byte[] buffer)
         {
             _stream = inputStream;
             _buffer = buffer;
@@ -48,14 +48,14 @@
         /// (<tt>0x00-0xffff</tt>), or -1 if the end of the stream has
         /// been reached
         /// </returns>
-        public CharLocation Read()
+        public char? Read()
         {
             // decode character
             var c = _surrogate;
 
-            if (_surrogate.Value != null)
+            if (_surrogate != null)
             {
-                _surrogate.Value = null;
+                _surrogate = null;
                 return c;
             }
 
@@ -64,14 +64,14 @@
             var index = 0;
 
             // get first byte
-            var byteZero = index == _bufferOffset
-                               ? _stream.ReadByte()
-                               : _buffer[index++] & 0x00FF;
+            var byteZero = index == _bufferOffset 
+                ? _stream.ReadByte() 
+                : _buffer[index++] & 0x00FF;
 
             if (byteZero == -1)
             {
                 // -1 == EOF
-                return CharLocation.Empty;
+                return null;
             }
 
             if (byteZero < 0x80)
@@ -79,29 +79,19 @@
                 // UTF-8:   [0xxx xxxx]
                 // Unicode: [0000 0000] [0xxx xxxx]
                 // Single Byte Char
-                c = new CharLocation { Value = (char)byteZero, ByteSpan = new Span { Start = GetCurrentPosition(index), End = GetCurrentPosition(index) + 1 } };
+                c = (char)byteZero;
             }
             else if ((byteZero & 0xE0) == 0xC0 && (byteZero & 0x1E) != 0)
             {
                 // UTF-8:   [110y yyyy] [10xx xxxx]
                 // Unicode: [0000 0yyy] [yyxx xxxx]
-                var start = GetCurrentPosition(index);
-                c = new CharLocation
-                    {
-                        Value = ReadTwoByteChar(index, byteZero),
-                        ByteSpan = { Start = start, End = GetCurrentPosition(index) + 1 }
-                    };
+                c = ReadTwoByteChar(index, byteZero);
             }
             else if ((byteZero & 0xF0) == 0xE0)
             {
                 // UTF-8:   [1110 zzzz] [10yy yyyy] [10xx xxxx]
                 // Unicode: [zzzz yyyy] [yyxx xxxx]
-                var start = GetCurrentPosition(index);
-                c = new CharLocation
-                    {
-                        Value = ReadThreeByteChar(index, byteZero),
-                        ByteSpan = { Start = start, End = GetCurrentPosition(index) + 1 }
-                    };
+                c = ReadThreeByteChar(index, byteZero);
             }
             else if ((byteZero & 0xF8) == 0xF0)
             {
@@ -109,12 +99,7 @@
                 // Unicode: [1101 10ww] [wwzz zzyy] (high surrogate)
                 //          [1101 11yy] [yyxx xxxx] (low surrogate)
                 //          * uuuuu = wwww + 1
-                var start = GetCurrentPosition(index);
-                c = new CharLocation
-                    {
-                        Value = ReadFourByteChar(index, byteZero),
-                        ByteSpan = { Start = start, End = GetCurrentPosition(index) + 1 }
-                    };
+                c = ReadFourByteChar(index, byteZero);
             }
             else
             {
@@ -122,11 +107,6 @@
             }
 
             return c;
-        }
-
-        private long GetCurrentPosition(int index)
-        {
-            return index == _bufferOffset ? _stream.Position - 1 : (_stream.Position - 1) - index;
         }
 
         private char? ReadFourByteChar(int index, int byteZero)
@@ -161,24 +141,24 @@
                 ThrowInvalidSurrogateException(uuuuu);
 
             var wwww = uuuuu - 1;
-
+         
             var highSurrogate = 0xD800 | ((wwww << 6) & 0x03C0) | ((byte1 << 2) & 0x003C) | ((byte2 >> 4) & 0x0003);
             var lowSurrogate = 0xDC00 | ((byte2 << 6) & 0x03C0) | (byte3 & 0x003F);
 
-            _surrogate.Value = (char?)lowSurrogate;
+            _surrogate = (char?)lowSurrogate;
             return (char?)highSurrogate;
         }
 
         private char? ReadThreeByteChar(int index, int byteZero)
         {
             var byte1 = index == _bufferOffset ? _stream.ReadByte() : _buffer[index++] & 0x00FF;
-
+                
             if (byte1 == -1)
                 ThrowExpectedByteException(2, 3);
 
             if ((byte1 & 0xC0) != 0x80 || (byteZero == 0xED && byte1 >= 0xA0) || ((byteZero & 0x0F) == 0 && (byte1 & 0x20) == 0))
                 ThrowInvalidByteException(2, 3, byte1);
-
+                
             var byteTwo = index == _bufferOffset ? _stream.ReadByte() : _buffer[index++] & 0x00FF;
 
             if (byteTwo == -1)
@@ -186,21 +166,21 @@
 
             if ((byteTwo & 0xC0) != 0x80)
                 ThrowInvalidByteException(3, 3, byteTwo);
-
-            return (char?)(((byteZero << 12) & 0xF000) | ((byte1 << 6) & 0x0FC0) | (byteTwo & 0x003F));
+                
+            return (char?) (((byteZero << 12) & 0xF000) | ((byte1 << 6) & 0x0FC0) | (byteTwo & 0x003F));
         }
 
         private char? ReadTwoByteChar(int index, int byteZero)
         {
             var byte1 = index == _bufferOffset ? _stream.ReadByte() : _buffer[index++] & 0x00FF;
-
+                
             if (byte1 == -1)
                 ThrowExpectedByteException(2, 2);
-
+                
             if ((byte1 & 0xC0) != 0x80)
                 ThrowInvalidByteException(2, 2, byte1);
-
-            return (char?)(((byteZero << 6) & 0x07C0) | (byte1 & 0x003F));
+                
+            return (char?) (((byteZero << 6) & 0x07C0) | (byte1 & 0x003F));
         }
 
         /// <summary>
@@ -231,10 +211,10 @@
                 }
 
                 // handle surrogate
-                if (_surrogate.Value.HasValue)
+                if (_surrogate.HasValue)
                 {
-                    buffer[outputbufferIndex++] = _surrogate.Value.Value;
-                    _surrogate = CharLocation.Empty;
+                    buffer[outputbufferIndex++] = _surrogate.Value;
+                    _surrogate = null;
                     length--;
                 }
 
@@ -269,7 +249,7 @@
                 currentByte = _buffer[inputBufferIndex];
                 if (currentByte >= emptyByte)
                 {
-                    buffer[outputbufferIndex++] = (char)currentByte;
+                    buffer[outputbufferIndex++] = (char) currentByte;
                 }
                 else
                 {
@@ -285,7 +265,7 @@
                 // Unicode: [0000 0000] [0xxx xxxx]
                 if (currentByte >= emptyByte)
                 {
-                    buffer[outputbufferIndex++] = (char)currentByte;
+                    buffer[outputbufferIndex++] = (char) currentByte;
                     continue;
                 }
 
@@ -306,7 +286,7 @@
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
+                                _buffer[0] = (byte) byteZero;
                                 _bufferOffset = 1;
                                 return outputbufferIndex - offset;
                             }
@@ -319,8 +299,8 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
                             _bufferOffset = 2;
 
                             return outputbufferIndex - offset;
@@ -330,11 +310,11 @@
                     }
 
                     var c = ((byteZero << 6) & 0x07C0) | (byte1 & 0x003F);
-
-                    buffer[outputbufferIndex++] = (char)c;
-
+                    
+                    buffer[outputbufferIndex++] = (char) c;
+                    
                     count -= 1;
-
+                    
                     continue;
                 }
 
@@ -355,7 +335,7 @@
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
+                                _buffer[0] = (byte) byteZero;
                                 _bufferOffset = 1;
 
                                 return outputbufferIndex - offset;
@@ -371,8 +351,8 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
                             _bufferOffset = 2;
 
                             return outputbufferIndex - offset;
@@ -389,13 +369,13 @@
                     else
                     {
                         byte2 = _stream.ReadByte();
-
+                      
                         if (byte2 == -1)
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
-                                _buffer[1] = (byte)byte1;
+                                _buffer[0] = (byte) byteZero;
+                                _buffer[1] = (byte) byte1;
                                 _bufferOffset = 2;
 
                                 return outputbufferIndex - offset;
@@ -411,9 +391,9 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
-                            _buffer[2] = (byte)byte2;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
+                            _buffer[2] = (byte) byte2;
                             _bufferOffset = 3;
 
                             return outputbufferIndex - offset;
@@ -423,7 +403,7 @@
                     }
 
                     var c = ((byteZero << 12) & 0xF000) | ((byte1 << 6) & 0x0FC0) | (byte2 & 0x003F);
-                    buffer[outputbufferIndex++] = (char)c;
+                    buffer[outputbufferIndex++] = (char) c;
                     count -= 2;
                     continue;
                 }
@@ -442,19 +422,19 @@
                     else
                     {
                         byte1 = _stream.ReadByte();
-
+                        
                         if (byte1 == -1)
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
+                                _buffer[0] = (byte) byteZero;
                                 _bufferOffset = 1;
                                 return outputbufferIndex - offset;
                             }
-
+                        
                             ThrowExpectedByteException(2, 4);
                         }
-
+                        
                         count++;
                     }
 
@@ -462,8 +442,8 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
                             _bufferOffset = 2;
 
                             return outputbufferIndex - offset;
@@ -481,18 +461,18 @@
                     else
                     {
                         byte2 = _stream.ReadByte();
-
+                        
                         if (byte2 == -1)
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
-                                _buffer[1] = (byte)byte1;
+                                _buffer[0] = (byte) byteZero;
+                                _buffer[1] = (byte) byte1;
                                 _bufferOffset = 2;
 
                                 return outputbufferIndex - offset;
                             }
-
+                        
                             ThrowExpectedByteException(3, 4);
                         }
 
@@ -503,9 +483,9 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
-                            _buffer[2] = (byte)byte2;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
+                            _buffer[2] = (byte) byte2;
                             _bufferOffset = 3;
 
                             return outputbufferIndex - offset;
@@ -523,16 +503,16 @@
                     else
                     {
                         byte3 = _stream.ReadByte();
-
+                       
                         if (byte3 == -1)
                         {
                             if (outputbufferIndex > offset)
                             {
-                                _buffer[0] = (byte)byteZero;
-                                _buffer[1] = (byte)byte1;
-                                _buffer[2] = (byte)byte2;
+                                _buffer[0] = (byte) byteZero;
+                                _buffer[1] = (byte) byte1;
+                                _buffer[2] = (byte) byte2;
                                 _bufferOffset = 3;
-
+                        
                                 return outputbufferIndex - offset;
                             }
 
@@ -546,10 +526,10 @@
                     {
                         if (outputbufferIndex > offset)
                         {
-                            _buffer[0] = (byte)byteZero;
-                            _buffer[1] = (byte)byte1;
-                            _buffer[2] = (byte)byte2;
-                            _buffer[3] = (byte)byte3;
+                            _buffer[0] = (byte) byteZero;
+                            _buffer[1] = (byte) byte1;
+                            _buffer[2] = (byte) byte2;
+                            _buffer[3] = (byte) byte3;
                             _bufferOffset = 4;
 
                             return outputbufferIndex - offset;
@@ -573,16 +553,16 @@
                     var lowSurrogate = 0xDC00 | ((yyyyyy << 6) & 0x03C0) | xxxxxx;
 
                     // set characters
-                    buffer[outputbufferIndex++] = (char)highSurrogate;
-
+                    buffer[outputbufferIndex++] = (char) highSurrogate;
+                    
                     if ((count -= 2) <= length)
                     {
-                        buffer[outputbufferIndex++] = (char)lowSurrogate;
+                        buffer[outputbufferIndex++] = (char) lowSurrogate;
                     }
                     else
                     {
                         // reached the end of the char buffer; save low surrogate for the next read
-                        _surrogate.Value = (char)lowSurrogate;
+                        _surrogate = (char) lowSurrogate;
                         --count;
                     }
 
@@ -592,7 +572,7 @@
                 // error
                 if (outputbufferIndex > offset)
                 {
-                    _buffer[0] = (byte)byteZero;
+                    _buffer[0] = (byte) byteZero;
                     _bufferOffset = 1;
 
                     return outputbufferIndex - offset;
@@ -617,12 +597,12 @@
             var ch = new char[_buffer.Length];
             do
             {
-                var length = ch.Length < remaining ? ch.Length : (int)remaining;
+                var length = ch.Length < remaining ? ch.Length : (int) remaining;
                 var count = Read(ch, 0, length);
 
                 if (count <= 0)
                     break;
-
+                
                 remaining -= count;
 
             } while (remaining > 0);
@@ -633,12 +613,12 @@
         public void Reset()
         {
             _bufferOffset = 0;
-            _surrogate = CharLocation.Empty;
+            _surrogate = null;
         }
 
         public void Dispose()
         {
-            if (null != _stream)
+            if(null != _stream)
                 _stream.Dispose();
         }
 
@@ -662,7 +642,7 @@
         {
             throw new MalformedByteSequenceException("InvalidBytes. position: " + position + " count: " + count);
         }
-
+        
         /// <summary>
         /// Throws an exception for invalid surrogate bits. 
         /// </summary>

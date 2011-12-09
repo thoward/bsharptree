@@ -66,6 +66,10 @@ namespace bsharptree
         {
             return _tree.ContainsKey(key);
         }
+        public bool UpdateKey(TKey key, object value)
+        {
+            return _tree.UpdateKey(key, ValueConverter.From(value));
+        }
 
         public void Commit()
         {

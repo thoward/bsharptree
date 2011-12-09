@@ -52,6 +52,11 @@ namespace bsharptree
             return Tree.ContainsKey(key);
         }
 
+        public bool UpdateKey(TKey key, TValue value)
+        {
+            return Tree.UpdateKey(key, ValueConverter.From(value));
+        }
+
         public void Commit()
         {
             Tree.Commit();

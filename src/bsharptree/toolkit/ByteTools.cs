@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using bsharptree.exception;
 
 namespace bsharptree.toolkit
@@ -132,6 +133,38 @@ namespace bsharptree.toolkit
             {
                 *((long*)(numRef + offset)) = value;
             }
+        }
+
+        public static void CopyTo(this Stream input, Stream output)
+        {
+            var size = (input.CanSeek) ? Math.Min((int)(input.Length - input.Position), 0x2000) : 0x2000;
+            var buffer = new byte[size];
+            int n;
+            do
+            {
+                n = input.Read(buffer, 0, buffer.Length);
+                output.Write(buffer, 0, n);
+            } while (n != 0);
+        }
+
+        public static void CopyTo(this MemoryStream input, Stream output)
+        {
+            output.Write(input.GetBuffer(), (int)input.Position, (int)(input.Length - input.Position));
+        }
+
+        public static void CopyTo(this Stream input, MemoryStream output)
+        {
+            if (input.CanSeek)
+            {
+                var pos = (int)output.Position;
+                var length = (int)(input.Length - input.Position) + pos;
+                output.SetLength(length);
+
+                while (pos < length)
+                    pos += input.Read(output.GetBuffer(), pos, length - pos);
+            }
+            else
+                input.CopyTo(output);
         }
     }
 }

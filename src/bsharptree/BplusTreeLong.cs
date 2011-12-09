@@ -49,7 +49,7 @@ namespace bsharptree
         private readonly Dictionary<int, BplusNode<TKey>> _idToTerminalNode = new Dictionary<int, BplusNode<TKey>>();
         private readonly Dictionary<BplusNode<TKey>, int> _terminalNodeToId = new Dictionary<BplusNode<TKey>, int>();
 
-        private readonly int _headersize = Headerprefix.Length + 1 + ByteTools.IntStorage * 3 + ByteTools.LongStorage * 2;
+        public readonly int Headersize = Headerprefix.Length + 1 + ByteTools.IntStorage * 3 + ByteTools.LongStorage * 2;
         private int _fifoLimit = 100;
         private int _lowerTerminalNodeCount;
         private int _terminalNodeCount;
@@ -320,6 +320,18 @@ namespace bsharptree
             return ContainsKey(key, out valueFound);
         }
 
+        public bool UpdateKey(TKey key, long value)
+        {
+            bool result = false;
+
+            if (Root != null)
+                result = Root.UpdateMatch(key, value);
+
+            ShrinkFootprint();
+
+            return result;
+        }
+
         /// <summary>
         /// Store off any changed buffers, clear the fifo, free invalid buffers
         /// </summary>
@@ -520,7 +532,7 @@ namespace bsharptree
 
             var tree = new BplusTreeLong<TKey>(fromfile, 100, 7, startSeek, dummyId, keyConverter); // dummy values for nodesize, keysize
             tree.ReadHeader();
-            tree.Buffers = BufferFile.SetupFromExistingStream(fromfile, startSeek + tree._headersize);
+            tree.Buffers = BufferFile.SetupFromExistingStream(fromfile, startSeek + tree.Headersize);
             
             if (tree.Buffers.Buffersize != tree.Buffersize)
                 throw new BplusTreeException("inner and outer buffer sizes should match");
@@ -552,7 +564,7 @@ namespace bsharptree
 
             var result = new BplusTreeLong<TKey>(fromfile, keyLength, nodeSize, startSeek, cultureId, keyConverter);
             result.SetHeader();
-            result.Buffers = BufferFile.InitializeBufferFileInStream(fromfile, result.Buffersize, startSeek + result._headersize);
+            result.Buffers = BufferFile.InitializeBufferFileInStream(fromfile, result.Buffersize, startSeek + result.Headersize);
             
             return result;
         }
@@ -710,10 +722,10 @@ namespace bsharptree
         private void ReadHeader()
         {
             // prefix | version | node size | key size | culture id | buffer number of root | buffer number of free list head
-            var header = new byte[_headersize];
+            var header = new byte[Headersize];
             
             Fromfile.Seek(SeekStart, SeekOrigin.Begin);
-            Fromfile.Read(header, 0, _headersize);
+            Fromfile.Read(header, 0, Headersize);
 
             var index = 0;
             // check prefix
@@ -749,7 +761,7 @@ namespace bsharptree
         public byte[] MakeHeader()
         {
             // prefix | version | node size | key size | culture id | buffer number of root | buffer number of free list head
-            var result = new byte[_headersize];
+            var result = new byte[Headersize];
             Headerprefix.CopyTo(result, 0);
             result[Headerprefix.Length] = Version;
             

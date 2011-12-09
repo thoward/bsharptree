@@ -396,7 +396,7 @@ namespace bsharptree
             thechild.TraverseToFollowingKey(0, out foundInLeaf, out keyFound);
         }
 
-        public bool FindMatch(TKey compareKey, out long valueFound)
+        public bool  FindMatch(TKey compareKey, out long valueFound)
         {
             valueFound = 0; // dummy value on failure
             BplusNode<TKey> leaf;
@@ -413,6 +413,22 @@ namespace bsharptree
             return false;
         }
 
+        public bool UpdateMatch(TKey compareKey, long value)
+        {
+            BplusNode<TKey> leaf;
+            var position = FindAtOrNextPositionInLeaf(compareKey, out leaf, false);
+            if (position < leaf._size)
+            {
+                var key = leaf.ChildKeys[position];
+                if (key != null && key.CompareTo(compareKey) == 0) //(key.Equals(CompareKey)
+                {
+                    leaf.ChildBufferNumbers[position] = value;
+                    leaf.MarkAsDirty();
+                    return true;
+                }
+            }
+            return false;
+        }
         public TKey FindNextKey(TKey compareKey)
         {
             

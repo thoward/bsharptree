@@ -1,0 +1,24 @@
+<% @TinyPG Language="cs" Namespace="bsharptree.example.simpleindex.query.parser" %>
+<% @Parser Generate="true" %>
+<% @Scanner Generate="true" Namespace="bsharptree.example.simpleindex.query.parser" %>
+<% @ParseTree Generate="true" Namespace="bsharptree.example.simpleindex.query.parser" %>
+
+TERM	 	-> @"[^()\s\+\-""]+";
+QUOTEDTERM 	-> @"[^""]+";
+QUOTE 		-> @"""";
+OPERATOR 	-> @"(AND|OR|NOT)";
+MUSTPREFIX 	-> @"\+";
+MUSTNOTPREFIX -> @"\-";
+BROPEN 	-> @"\(";
+BRCLOSE 	-> @"\)";
+EOF         	-> @"^$";
+
+[Skip] WHITESPACE  -> @"\s+";
+
+Start 		-> OPERATOR* Expression* EOF; 
+Expression	-> (OPERATOR* (MustClause | MustNotClause | Clause) OPERATOR*)*;
+MustClause	-> MUSTPREFIX (Term | SubClause);
+MustNotClause	-> MUSTNOTPREFIX (Term | SubClause);
+Clause		-> (Term | SubClause);
+SubClause	-> BROPEN OPERATOR* Expression* OPERATOR* BRCLOSE;
+Term	 	-> TERM? | QUOTE QUOTEDTERM? QUOTE;

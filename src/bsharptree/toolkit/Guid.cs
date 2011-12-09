@@ -7,6 +7,7 @@ namespace bsharptree.toolkit
     /// </summary>
     public class Guid: IFormattable, IComparable, IComparable<Guid>, IEquatable<Guid>
     {
+        public const int Size = 16;
         public static readonly Guid Empty = new Guid(System.Guid.Empty);
 
         public Guid()
@@ -57,6 +58,11 @@ namespace bsharptree.toolkit
 
         public static bool operator ==(Guid a, Guid b)
         {
+            if ((object)a == null)
+                return ((object)b == null);
+            else
+                return a.Equals(b);
+            
             return a._guid == b._guid;
         }
         public static bool operator !=(Guid a, Guid b)
@@ -89,7 +95,7 @@ namespace bsharptree.toolkit
 
         public static implicit operator System.Guid(Guid guid)
         {
-            return guid._guid;
+            return guid == null ? System.Guid.Empty : guid._guid;
         }
         public static implicit operator Guid(System.Guid guid)
         {

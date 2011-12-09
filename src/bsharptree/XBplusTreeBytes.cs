@@ -115,6 +115,14 @@ namespace bsharptree
             return bucket.Find(key, out map);
         }
 
+        public bool UpdateKey(TKey key, byte[] value)
+        {
+            if (!ContainsKey(key)) return false;
+            RemoveKey(key);
+            this[key] = value;
+            return true;
+        }
+
         public byte[] this[TKey key]
         {
             get

@@ -131,9 +131,18 @@ namespace bsharptree
             value = null;
             return false;
         }
+
         public bool ContainsKey(TKey key)
         {
             return _tree.ContainsKey(key);
+        }
+
+        public bool UpdateKey(TKey key, byte[] value)
+        {
+            if (!ContainsKey(key)) return false;
+            RemoveKey(key);
+            this[key] = value;
+            return true;
         }
 
         public byte[] this[TKey key]

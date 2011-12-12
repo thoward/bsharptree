@@ -3,7 +3,6 @@
     public interface IStorageItem<TKey, TValue>
     {
         TKey Key { get; }
-
         TValue Value { get; }
     }
 }

@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace bsharptree.test.mockindex
+﻿namespace bsharptree.test.mockindex
 {
-    public interface IInvertable<TKey, TValue, TUnit>
-    {
-        TKey Id { get; set; }
-        TValue Value { get; set; }
-        IComparer<TKey> GetComparer();
-    }
+    using bsharptree.example.simpleindex.analysis;
 
     public class Document : IInvertable<int, string, string>
     {
@@ -21,10 +13,5 @@ namespace bsharptree.test.mockindex
         public int Id { get; set; }
 
         public string Value { get; set; }
-
-        public IComparer<int> GetComparer()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

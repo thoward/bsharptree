@@ -9,7 +9,9 @@ namespace bsharptree.example.simpleindex
 {
     using bsharptree.example.simpleindex.storage;
 
-    public struct Term : IEquatable<Term>, IComparable<Term>, IStorageItem<string, IEnumerable<DocumentLocation>>
+    using Guid = System.Guid;
+
+    public struct Term : IEquatable<Term>, IComparable<Term>, IStorageItem<string, IEnumerable<DocumentLocation>>, IInversion<Guid, IEnumerable<DocumentLocation>, string>
     {
         public Term(string value, IEnumerable<DocumentLocation> docLocations)
             : this()
@@ -19,6 +21,18 @@ namespace bsharptree.example.simpleindex
         }
 
         public string Key { get; set; }
+
+        public List<IInvertable<Guid, IEnumerable<DocumentLocation>, string>> Invertables
+        {
+            get
+            {
+                return Value;
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public IEnumerable<DocumentLocation> Value { get; set; }
 

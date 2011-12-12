@@ -4,15 +4,13 @@ using System.Linq;
 
 namespace bsharptree.test.mockindex
 {
+    using bsharptree.example.simpleindex.analysis;
+    using bsharptree.example.simpleindex.query;
+    using bsharptree.toolkit;
+
     public class SimpleIndex : IIndex<int, string, string>
     {
-        public IEnumerable<IInversion<int, string, string>> Inversions 
-        { 
-            get
-            {
-                return _terms.Values;
-            }
-        }
+        public IEnumerable<IInversion<int, string, string>> Inversions { get { return _terms.Values; } }
 
         public void AddItem(IInvertable<int, string, string> item)
         {
@@ -24,10 +22,10 @@ namespace bsharptree.test.mockindex
             foreach(var unit in inverter.Invert(item))
             {
                 IInversion<int, string, string> term;
-                if (!_terms.TryGetValue(unit.Value, out term))
+                if (!_terms.TryGetValue(unit.Unit, out term))
                 {
-                    term = new Term { Value = unit.Value };
-                    _terms.Add(unit.Value, term);
+                    term = new Term { Key = unit.Unit };
+                    _terms.Add(unit.Unit, term);
                 }
 
                 if (!term.Invertables.Contains(item, DocumentComparer.Default))
@@ -36,26 +34,26 @@ namespace bsharptree.test.mockindex
             }
         }
 
-        private Dictionary<string, IInversion<int, string, string>> _terms = new Dictionary<string, IInversion<int, string, string>>();
-        
-        public QueryExecutor QueryExecutor { get { return new QueryExecutor(Inversions); } }
+        private readonly Dictionary<string, IInversion<int, string, string>> _terms = new Dictionary<string, IInversion<int, string, string>>();
 
-        public QueryExecutor GetQueryExecutor(QueryClause clause)
+        public IQueryExecutor<int, string, string> QueryExecutor { get { return new QueryExecutor<int, string, string>(Inversions, DocumentComparer.Default); } }
+
+        public IQueryExecutor<int, string, string> GetQueryExecutor(IQueryClause<string> clause)
         {
             return GetQueryExecutor(QueryExecutor, clause);
         }
 
-        public QueryExecutor GetQueryExecutor(QueryExecutor state, QueryClause clause)
+        public IQueryExecutor<int, string, string> GetQueryExecutor(IQueryExecutor<int, string, string> state, IQueryClause<string> clause)
         {
-            var clauseExecutor = state;
+            //var clauseExecutor = state;
+            
+            IQueryExecutor<int, string, string> clauseExecutor;
 
-            if (clause.MustTerms.Count == 0 && clause.MustSubClauses.Count == 0)
+            if (clause.Must.Count == 0 && clause.MustSubClauses.Count == 0)
             {
-                clauseExecutor = new QueryExecutor(Inversions, new List<Document>());
+                clauseExecutor = new QueryExecutor<int, string, string>(Inversions, DocumentComparer.Default); //, new List<Document>()
 
-
-
-                foreach (var element in clause.ShouldTerms)
+                foreach (var element in clause.Should)
                     clauseExecutor = clauseExecutor.Should(element);
 
                 foreach (var element in clause.ShouldSubClauses)
@@ -69,10 +67,9 @@ namespace bsharptree.test.mockindex
             }
             else
             {
-                clauseExecutor = new QueryExecutor(Inversions, Inversions.Documents());
-
-
-                foreach (var element in clause.MustTerms)
+                clauseExecutor = new QueryExecutor<int, string, string>(Inversions, Inversions.Documents(DocumentComparer.Default), DocumentComparer.Default);
+                
+                foreach (var element in clause.Must)
                     clauseExecutor = clauseExecutor.MustHave(element);
 
                 foreach (var element in clause.MustSubClauses)
@@ -82,7 +79,7 @@ namespace bsharptree.test.mockindex
                 //state = clause.MustSubClauses.Aggregate(state, (current, subclause) => current.MustHave(GetQueryExecutor(current, subclause)));
             }
 
-            foreach (var element in clause.MustNotTerms)
+            foreach (var element in clause.MustNot)
                 clauseExecutor = clauseExecutor.MustNot(element);
 
             foreach (var element in clause.MustNotSubClauses)
@@ -110,10 +107,23 @@ namespace bsharptree.test.mockindex
 
         }
 
-        // hmmm...
-        public QueryExecutor AggregateQueryOperations<T>(IEnumerable<T> queryElements, QueryExecutor state, Func<T, QueryExecutor> queryOperation)
+        //// hmmm...
+        //public QueryExecutor AggregateQueryOperations<T>(IEnumerable<T> queryElements, QueryExecutor state, Func<T, QueryExecutor> queryOperation)
+        //{
+        //    return queryElements.Aggregate(state, (current, term) => queryOperation(term));
+        //}
+
+        public IEnumerable<IInvertable<int, string, string>> ExecuteQuery(string queryText, IInverter<string, string> inverter)
         {
-            return queryElements.Aggregate(state, (current, term) => queryOperation(term));
+            var parser = new QueryParser<string, string>(
+                inverter,
+                new GenericConverter<string, string>(a => a, a => a),
+                new GenericConverter<string, string>(a => a, a => a));
+
+            var rootQueryClause = parser.Parse(queryText);
+            var queryExecutor = GetQueryExecutor(rootQueryClause);
+
+            return queryExecutor.Invertables();
         }
     }
 }

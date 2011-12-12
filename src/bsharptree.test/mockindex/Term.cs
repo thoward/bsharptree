@@ -2,15 +2,17 @@
 
 namespace bsharptree.test.mockindex
 {
+    using bsharptree.example.simpleindex.analysis;
+
     public class Term : IInversion<int, string, string>
     {
         public Term()
         {
-            Value = string.Empty;
+            Key = string.Empty;
             Invertables = new List<IInvertable<int, string, string>>();
         }
         
-        public string Value { get; set; }
+        public string Key { get; set; }
         public List<IInvertable<int, string, string>> Invertables { get; set; }
     }
 }

@@ -249,22 +249,22 @@ namespace bsharptree.test
                     }
                 }
 
-                var foo = new IndexQueryProvider();
-                var docStorage = new DocumentStorage(dixS, ddtS);
-                var results = from term in foo.Terms
-                              from location in term.Value
-                              where term.Key == "foo" || term.Key == "bar"
-                              select location;
+                //var foo = new IndexQueryProvider();
+                //var docStorage = new DocumentStorage(dixS, ddtS);
+                //var results = from term in foo.Terms
+                //              from location in term.Value
+                //              where term.Key == "foo" || term.Key == "bar"
+                //              select location;
 
-                foreach (var result in results.Distinct())
-                {
-                    Console.Out.WriteLine(result.Document);
+                //foreach (var result in results.Distinct())
+                //{
+                //    Console.Out.WriteLine(result.Document);
 
-                    var document = docStorage.Get(result.Document);
-                    var context = docStorage.GetContext(result);
-                    Console.Out.WriteLine(context);
-                    Console.Out.WriteLine();
-                }
+                //    var document = docStorage.Get(result.Document);
+                //    var context = docStorage.GetContext(result);
+                //    Console.Out.WriteLine(context);
+                //    Console.Out.WriteLine();
+                //}
 
             }
         }
@@ -634,7 +634,7 @@ namespace bsharptree.test
             index.AddItem(new mockindex.Document { Id = 8, Value = "five three" });
             index.AddItem(new mockindex.Document { Id = 9, Value = "three" });
 
-            foreach (var result in index.Inversions.Documents())
+            foreach (var result in index.Inversions.Documents(DocumentComparer.Default))
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -650,7 +650,7 @@ namespace bsharptree.test
             Console.Out.WriteLine("==== five OR two OR three ");
 
             var results = index.QueryExecutor.MustHave("five").Should("two").Should("three");
-            foreach (var result in results.Documents())
+            foreach (var result in results.Invertables())
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -659,7 +659,7 @@ namespace bsharptree.test
             var subQuery = index.QueryExecutor.MustHave("two").MustNot("three");
             results = index.QueryExecutor.MustHave("five").Should(subQuery);
 
-            foreach (var result in results.Documents())
+            foreach (var result in results.Invertables())
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -680,10 +680,10 @@ namespace bsharptree.test
             index.AddItem(new mockindex.Document { Id = 8, Value = "five three" });
             index.AddItem(new mockindex.Document { Id = 9, Value = "three" });
             index.AddItem(new mockindex.Document { Id = 10, Value = "four two three" });
-            
 
 
-            foreach (var result in index.Inversions.Documents())
+
+            foreach (var result in index.Inversions.Documents(DocumentComparer.Default))
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -694,7 +694,7 @@ namespace bsharptree.test
 
             var finalQuery = rootQuery.Should(subQuery);
 
-            foreach (var result in finalQuery.Documents())
+            foreach (var result in finalQuery.Invertables())
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -702,26 +702,28 @@ namespace bsharptree.test
             //var queryText = "-six foo four +one";
             var queryText = "+(five (four AND two)) +(three two nothing here to see) -two";
 
-            Console.Out.WriteLine("=== graph for " + queryText + "===");
-            var parser = new Parser(new Scanner());
-            var tree = parser.Parse(queryText);
+            DoQuery(index, queryText, new StringInverter());
 
-            var rootExpressionNode =
-                tree.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Start).Nodes.FirstOrDefault(
-                    a => a.Token.Type == TokenType.Expression);
+            //Console.Out.WriteLine("=== graph for " + queryText + "===");
+            //var parser = new Parser(new Scanner());
+            //var tree = parser.Parse(queryText);
+
+            //var rootExpressionNode =
+            //    tree.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Start).Nodes.FirstOrDefault(
+            //        a => a.Token.Type == TokenType.Expression);
             
-            if(default(ParseNode) == rootExpressionNode)
-                throw new Exception("No query in parse tree.");
+            //if(default(ParseNode) == rootExpressionNode)
+            //    throw new Exception("No query in parse tree.");
 
-            var rootQueryClause = AnalyzeQueryNode(rootExpressionNode);
+            //var rootQueryClause = AnalyzeQueryNode(rootExpressionNode, );
 
-            QueryExecutor queryExecutor = index.GetQueryExecutor(rootQueryClause);
+            //var queryExecutor = index.GetQueryExecutor(rootQueryClause);
 
-            Console.Out.WriteLine("=== results for: " + queryText + " ===");
-            foreach (var result in queryExecutor.Documents())
-            {
-                Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
-            }
+            //Console.Out.WriteLine("=== results for: " + queryText + " ===");
+            //foreach (var result in queryExecutor.Invertables())
+            //{
+            //    Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
+            //}
 
             //foreach (var leafnode in FindLeafNodes(tree))
             //{
@@ -750,21 +752,23 @@ namespace bsharptree.test
         [Test]
         public void TestSomeExamples()
         {
-            var index = new SimpleIndex();
-            index.AddItem(new mockindex.Document { Id = 1, Value = "A B C D E F" });
-            index.AddItem(new mockindex.Document { Id = 2, Value = "B C" });
-            index.AddItem(new mockindex.Document { Id = 3, Value = "A B E F" });
-            index.AddItem(new mockindex.Document { Id = 4, Value = "C D E F" });
-            index.AddItem(new mockindex.Document { Id = 5, Value = "E F" });
-            index.AddItem(new mockindex.Document { Id = 6, Value = "D D D D E F" });
-            index.AddItem(new mockindex.Document { Id = 7, Value = "D E F" });
-//            index.AddDocument(new Document { DocID = 8, Text = "A B C D E F" });
-//            index.AddDocument(new Document { DocID = 9, Text = "A B C D E F" });
-            index.AddItem(new mockindex.Document { Id = 10, Value = "A B" });
-            index.AddItem(new mockindex.Document { Id = 11, Value = "E E E A B" });
-            index.AddItem(new mockindex.Document { Id = 12, Value = "C A B" });
-            
-            foreach (var result in index.Inversions.Documents())
+            IIndex<int, string, string> index = new SimpleIndex();
+            IInverter<string, string> inverter = new StringInverter();
+
+            index.AddItem(new mockindex.Document { Id = 1, Value = "A B C D E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 2, Value = "B C" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 3, Value = "A B E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 4, Value = "C D E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 5, Value = "E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 6, Value = "D D D D E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 7, Value = "D E F" }, inverter);
+            //            index.AddDocument(new Document { DocID = 8, Text = "A B C D E F" }, inverter);
+            //            index.AddDocument(new Document { DocID = 9, Text = "A B C D E F" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 10, Value = "A B" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 11, Value = "E E E A B" }, inverter);
+            index.AddItem(new mockindex.Document { Id = 12, Value = "C A B" }, inverter);
+
+            foreach (var result in index.Inversions.Documents(DocumentComparer.Default))
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
@@ -773,152 +777,170 @@ namespace bsharptree.test
             Console.Out.WriteLine("find documents that match clause A and clause B (other clauses don't affect matching) ");
             Console.Out.WriteLine("-------------------------");
             var queryText = "A AND B OR C OR D OR E OR F";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
             
             queryText = "+A +B C D E F";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
 
             Console.Out.WriteLine("-------------------------");
             Console.Out.WriteLine("find documents matching at least one of these clauses ");
             Console.Out.WriteLine("-------------------------");
             queryText = "C OR D OR E OR F";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
 
             queryText = "C D E F";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
             
             Console.Out.WriteLine("-------------------------");
             Console.Out.WriteLine("find documents that match A, and match one of B, C, D, E, or F ");
             Console.Out.WriteLine("-------------------------");
             queryText = "A AND (B OR C OR D OR E OR F)";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
 
             queryText = "+A +(B C D E F)";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
             
             Console.Out.WriteLine("-------------------------");
             Console.Out.WriteLine("find documents that match at least one of C, D, E, F, or both of A and B");
             Console.Out.WriteLine("-------------------------");
             queryText = "(A AND B) OR C OR D OR E OR F ";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
 
             queryText = "(+A +B) C D E F";
-            DoQuery(index, queryText);
+            DoQuery(index, queryText, inverter);
         }
 
-        private static void DoQuery(SimpleIndex index, string queryText)
+        private static void DoQuery(IIndexReader<int, string, string> index, string queryText, IInverter<string, string> inverter)
         {
             Console.Out.WriteLine("=== graph for " + queryText + "===");
-            var parser = new Parser(new Scanner());
-            var tree = parser.Parse(queryText);
 
-            var rootExpressionNode =
-                tree.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Start).Nodes.FirstOrDefault(
-                    a => a.Token.Type == TokenType.Expression);
-
-            if (default(ParseNode) == rootExpressionNode)
-                throw new Exception("No query in parse tree.");
-
-            var rootQueryClause = AnalyzeQueryNode(rootExpressionNode);
-
-            QueryExecutor queryExecutor = index.GetQueryExecutor(rootQueryClause);
+            var results = index.ExecuteQuery(queryText, inverter);
 
             Console.Out.WriteLine("=== results for: " + queryText + " ===");
-            foreach (var result in queryExecutor.Documents())
+
+            foreach (var result in results)
             {
                 Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
             }
         }
 
-        private static QueryClause AnalyzeQueryNode(ParseNode node, QueryClauseFlag flag = QueryClauseFlag.Should)
-        {
-            // assume we are working with an expression node.
-            if(node.Token.Type != TokenType.Expression)
-                throw new Exception("Must be an expression node!");
+        //    var parser = new Parser(new Scanner());
+        //    var tree = parser.Parse(queryText);
 
-            var queryClause = new QueryClause { Flag = flag };
-            var precedingOperator = "OR";
+        //    var rootExpressionNode =
+        //        tree.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Start).Nodes.FirstOrDefault(
+        //            a => a.Token.Type == TokenType.Expression);
 
-            for (int i = 0; i < node.Nodes.Count; i++)
-            {
-                var subnode = node.Nodes[i];
+        //    if (default(ParseNode) == rootExpressionNode)
+        //        throw new Exception("No query in parse tree.");
 
-                switch (subnode.Token.Type)
-                {
-                    case TokenType.MustClause:
-                    case TokenType.MustNotClause:
-                    case TokenType.Clause:
+        //    var rootQueryClause = AnalyzeQueryNode(rootExpressionNode, inverter);
 
-                        var followingOperator = GetFollowingOperator(node, i);
-                        var queryClauseFlag = GetQueryClauseFlag(subnode, precedingOperator, followingOperator);
+        //    var queryExecutor = index.GetQueryExecutor(rootQueryClause);
+
+        //    Console.Out.WriteLine("=== results for: " + queryText + " ===");
+        //    foreach (var result in queryExecutor.Invertables())
+        //    {
+        //        Console.Out.WriteLine("doc: {0}, text: {1}", result.Id, result.Value);
+        //    }
+        //}
+
+        //private static QueryClause<string> AnalyzeQueryNode(ParseNode node, IInverter<string, string> inverter, QueryClauseFlag flag = QueryClauseFlag.Should)
+        //{
+        //    // assume we are working with an expression node.
+        //    if(node.Token.Type != TokenType.Expression)
+        //        throw new Exception("Must be an expression node!");
+
+        //    var queryClause = new QueryClause { Flag = flag };
+        //    var precedingOperator = "OR";
+
+        //    for (int i = 0; i < node.Nodes.Count; i++)
+        //    {
+        //        var subnode = node.Nodes[i];
+
+        //        switch (subnode.Token.Type)
+        //        {
+        //            case TokenType.MustClause:
+        //            case TokenType.MustNotClause:
+        //            case TokenType.Clause:
+
+        //                var followingOperator = GetFollowingOperator(node, i);
+        //                var queryClauseFlag = GetQueryClauseFlag(subnode, precedingOperator, followingOperator);
                         
-                        // determine if the clause is a term or subclause
-                        foreach (var childnode in subnode.Nodes)
-                        {
-                            switch (childnode.Token.Type)
-                            {
-                                case TokenType.SubClause:
-                                    var expressionNode =
-                                        childnode.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Expression);
+        //                // determine if the clause is a term or subclause
+        //                foreach (var childnode in subnode.Nodes)
+        //                {
+        //                    switch (childnode.Token.Type)
+        //                    {
+        //                        case TokenType.SubClause:
+        //                            var expressionNode =
+        //                                childnode.Nodes.FirstOrDefault(a => a.Token.Type == TokenType.Expression);
 
-                                    if (expressionNode != default(ParseNode))
-                                    {
-                                        var subClause = AnalyzeQueryNode(expressionNode, queryClauseFlag);
-                                        queryClause.AddSubClause(subClause);
-                                    }
-                                    break;
-                                case TokenType.Term:
-                                    var termNode =
-                                        childnode.Nodes.FirstOrDefault(
-                                            a => a.Token.Type == TokenType.TERM || a.Token.Type == TokenType.QUOTEDTERM);
+        //                            if (expressionNode != default(ParseNode))
+        //                            {
+        //                                var subClause = AnalyzeQueryNode(expressionNode, inverter, queryClauseFlag);
+        //                                queryClause.AddSubClause(subClause);
+        //                            }
+        //                            break;
+        //                        case TokenType.Term:
+        //                            var termNode =
+        //                                childnode.Nodes.FirstOrDefault(
+        //                                    a => a.Token.Type == TokenType.TERM || a.Token.Type == TokenType.QUOTEDTERM);
 
-                                    if (termNode != default(ParseNode)) queryClause.AddTerm(termNode.Token.Text, queryClauseFlag);
+        //                            if (termNode != default(ParseNode))
+        //                            {
+        //                                var units = inverter.Invert(termNode.Token.Text);
+        //                                foreach(var unit in units)
+        //                                    queryClause.AddUnit(unit, queryClauseFlag);
+        //                            }
 
-                                    break;
-                            }
-                        }
-                        break;
-                    case TokenType.OPERATOR:
-                        precedingOperator = subnode.Token.Text;
-                        break;
-                }
-            }
-            return queryClause;
-        }
+        //                            break;
+        //                    }
+        //                }
+        //                break;
+        //            case TokenType.OPERATOR:
+        //                precedingOperator = subnode.Token.Text;
+        //                break;
+        //        }
+        //    }
+        //    return queryClause;
+        //}
 
-        private static string GetFollowingOperator(ParseNode node, int i)
-        {
-            if ((i + 1) < node.Nodes.Count)
-            {
-                var followingNode = node.Nodes[i + 1];
-                if (followingNode.Token.Type == TokenType.OPERATOR)
-                    return followingNode.Token.Text;
-            }
+        //private static string GetFollowingOperator(ParseNode node, int i)
+        //{
+        //    if ((i + 1) < node.Nodes.Count)
+        //    {
+        //        var followingNode = node.Nodes[i + 1];
+        //        if (followingNode.Token.Type == TokenType.OPERATOR)
+        //            return followingNode.Token.Text;
+        //    }
 
-            return "OR"; // default
-        }
+        //    return "OR"; // default
+        //}
 
-        private static QueryClauseFlag GetQueryClauseFlag(ParseNode subnode, string precedingOperator, string followingOperator)
-        {
-            // note: +/- modifiers have higher precedence than conjunction operators, 
-            // and the conjunction operator closest to the clause wins. AND OR AND NOT foo == NOT foo
-            switch (subnode.Token.Type)
-            {
-                case TokenType.MustClause:
-                    return QueryClauseFlag.Must;
-                case TokenType.MustNotClause:
-                    return QueryClauseFlag.MustNot;
-                case TokenType.Clause:
-                    if(precedingOperator == "NOT")
-                        return QueryClauseFlag.MustNot;
+        //private static QueryClauseFlag GetQueryClauseFlag(ParseNode subnode, string precedingOperator, string followingOperator)
+        //{
+        //    // note: +/- modifiers have higher precedence than conjunction operators, 
+        //    // and the conjunction operator closest to the clause wins. AND OR AND NOT foo == NOT foo
+        //    switch (subnode.Token.Type)
+        //    {
+        //        case TokenType.MustClause:
+        //            return QueryClauseFlag.Must;
+        //        case TokenType.MustNotClause:
+        //            return QueryClauseFlag.MustNot;
+        //        case TokenType.Clause:
+        //            if(precedingOperator == "NOT")
+        //                return QueryClauseFlag.MustNot;
 
-                    // note: this causes preceding operator to have higher precedence than following
-                    if(precedingOperator == "AND" || followingOperator == "AND") 
-                        return QueryClauseFlag.Must;
+        //            // note: this causes preceding operator to have higher precedence than following
+        //            if(precedingOperator == "AND" || followingOperator == "AND") 
+        //                return QueryClauseFlag.Must;
 
-                    break;
-            }
-            return QueryClauseFlag.Should;
-        }
+        //            break;
+        //    }
+        //    return QueryClauseFlag.Should;
+        //}
     }
+
+
 }

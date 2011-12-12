@@ -2,9 +2,12 @@
 
 namespace bsharptree.test.mockindex
 {
+    using bsharptree.example.simpleindex.analysis;
+
     public class DocumentComparer : IEqualityComparer<IInvertable<int, string, string>>
     {
         public static DocumentComparer Default = new DocumentComparer();
+
         public bool Equals(IInvertable<int, string, string> x, IInvertable<int, string, string> y)
         {
             if (x == null && y == null) return true;

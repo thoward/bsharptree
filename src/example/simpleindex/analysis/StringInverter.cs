@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class StringInverter: Inverter<string, string>
+    public class StringInverter: Inverter<int, string, string>
     {
         public override string NormalizeUnit(string unit)
         {

@@ -26,12 +26,19 @@ namespace bsharptree.example.simpleindex
         {
             get
             {
-                return Value;
+                return (List<IInvertable<Guid, IEnumerable<DocumentLocation>, string>>)Value;
             }
             set
             {
                 throw new NotImplementedException();
             }
+        }
+
+        public bool Match(string unit)
+        {
+            return Key.Equals(unit) 
+                ? true // complete match 
+                : Key.StartsWith(unit); // implicit wildcards
         }
 
         public IEnumerable<DocumentLocation> Value { get; set; }

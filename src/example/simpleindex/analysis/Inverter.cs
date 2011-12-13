@@ -3,9 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public abstract class Inverter<TSource, TUnit> : IInverter<TSource, TUnit>
+    public abstract class Inverter<TInvertableKey, TSource, TUnit> : IInverter<TInvertableKey, TSource, TUnit>
     {
-        public IEnumerable<IInversionUnit<TInvertableKey, TUnit>> Invert<TInvertableKey>(IInvertable<TInvertableKey, TSource, TUnit> intervable)
+        public IEnumerable<IInversionUnit<TInvertableKey, TUnit>> Invert(IInvertable<TInvertableKey, TSource, TUnit> intervable)
         {
             var source = intervable.Value;
 

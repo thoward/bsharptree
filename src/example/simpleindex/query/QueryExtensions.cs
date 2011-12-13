@@ -19,7 +19,7 @@
             return inversions.Where(a =>
                 {
                     //Console.Out.WriteLine("a: " + a.Value + ", b: " + unit);
-                    return a.Key.Equals(unit);
+                    return a.Match(unit);
                 }).Documents(comparer);
         }
         public static IEnumerable<IInvertable<TKey, TSource, TUnit>> Should<TKey, TSource, TUnit>(this IEnumerable<IInvertable<TKey, TSource, TUnit>> results, IEnumerable<IInversion<TKey, TSource, TUnit>> allTerms, TUnit unit, IEqualityComparer<IInvertable<TKey, TSource, TUnit>> comparer)

@@ -6,5 +6,6 @@
     {
         TUnit Key { get; set; }
         List<IInvertable<TInvertableKey, TSource, TUnit>> Invertables { get; set; }
+        bool Match(TUnit unit);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace bsharptree.example.simpleindex.analysis
 {
-    public struct DocumentLocation
+    public struct DocumentLocation : IInversionUnit<Guid, TermLocation>
     {
-        public Span Span;
-        public Guid Document;
+        public Guid InvertableKey { get; set; }
+        public TermLocation Unit { get; set; }
     }
 }

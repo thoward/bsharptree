@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7A0F7552-0951-4FDA-A4CA-2A9BC8B3FC62}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>bsharptree.example.simpleindex</RootNamespace>
+    <AssemblyName>bsharptree.example.simpleindex</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="analysis\CharLocation.cs" />
+    <Compile Include="analysis\InversionUnit.cs" />
+    <Compile Include="analysis\Inverter.cs" />
+    <Compile Include="analysis\StringInverter.cs" />
+    <None Include="MockClient.cs" />
+    <Compile Include="analysis\DefaultAnalyzer.cs" />
+    <Compile Include="query\IIndexReader.cs" />
+    <Compile Include="query\IQueryParser.cs" />
+    <Compile Include="query\parser\ParseNodeExtensions.cs" />
+    <Compile Include="query\QueryClause.cs" />
+    <Compile Include="query\QueryClauseFlag.cs" />
+    <Compile Include="query\QueryExecutor.cs" />
+    <Compile Include="query\QueryExtensions.cs" />
+    <Compile Include="query\QueryParser.cs" />
+    <Compile Include="storage\IIndexWriter.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="analysis\DocumentLocation.cs" />
+    <Compile Include="analysis\IAnalyzer.cs" />
+    <Compile Include="IIndex.cs" />
+    <Compile Include="analysis\IInversion.cs" />
+    <Compile Include="analysis\IInversionUnit.cs" />
+    <Compile Include="analysis\IInvertable.cs" />
+    <Compile Include="analysis\IInverter.cs" />
+    <Compile Include="IndexWriter.cs" />
+    <Compile Include="analysis\MalformedByteSequenceException.cs" />
+    <Compile Include="query\IQueryClause.cs" />
+    <Compile Include="query\IQueryExecutor.cs" />
+    <Compile Include="query\parser\Parser.cs" />
+    <Compile Include="query\parser\ParseTree.cs" />
+    <Compile Include="query\parser\Scanner.cs" />
+    <Compile Include="SingleDocumentIndex.cs" />
+    <Compile Include="storage\DocumentRecordStorage.cs" />
+    <Compile Include="storage\DocumentStorage.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="analysis\Span.cs" />
+    <Compile Include="storage\IStorageItem.cs" />
+    <Compile Include="storage\RecordStorage.cs" />
+    <Compile Include="storage\Storage.cs" />
+    <Compile Include="storage\StreamLoadingTools.cs" />
+    <Compile Include="storage\StreamSegment.cs" />
+    <Compile Include="Term.cs" />
+    <Compile Include="storage\TermRecordStorage.cs" />
+    <Compile Include="storage\TermStorage.cs" />
+    <Compile Include="analysis\TermLocation.cs" />
+    <Compile Include="analysis\Utf8CharScanner.cs" />
+    <Compile Include="analysis\Utf8Reader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\bsharptree\bsharptree.csproj">
+      <Project>{78835932-FBAA-4F6D-A3FD-9F25055E285C}</Project>
+      <Name>bsharptree</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\simpledb\simpledb.csproj">
+      <Project>{4631962B-C20D-4584-8398-B75737759CC4}</Project>
+      <Name>simpledb</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="query\parser\simple-index-query.tpg" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

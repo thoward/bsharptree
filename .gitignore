@@ -8,3 +8,5 @@ TestResults
 *.user
 *.suo
 _ReSharper.*
+*.pidb
+*.userprefs

@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree", "..\src\bsharptree\bsharptree.csproj", "{78835932-FBAA-4F6D-A3FD-9F25055E285C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree", "\bsharptree\bsharptree.csproj", "{78835932-FBAA-4F6D-A3FD-9F25055E285C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree.test", "..\src\bsharptree.test\bsharptree.test.csproj", "{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bsharptree.test", "\bsharptree.test\bsharptree.test.csproj", "{F9F14CDB-3CE3-4DB5-ABB9-9F40ED93E4BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpledb", "..\src\example\simpledb\simpledb.csproj", "{4631962B-C20D-4584-8398-B75737759CC4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpledb", "\example\simpledb\simpledb.csproj", "{4631962B-C20D-4584-8398-B75737759CC4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{C14ECF88-062A-4720-8C11-79302CB5CB63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpleindex", "..\src\example\simpleindex\simpleindex.csproj", "{7A0F7552-0951-4FDA-A4CA-2A9BC8B3FC62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpleindex", "\example\simpleindex\simpleindex.csproj", "{7A0F7552-0951-4FDA-A4CA-2A9BC8B3FC62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
